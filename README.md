@@ -90,9 +90,7 @@ This involves:
 
   - Interactive GUI to load an image, apply one or more transformations, preview and save results.
 
-
-
-
+![alt text](assets/image_transformation_gui_interface.png)
 
 - `app.py`
 
