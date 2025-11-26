@@ -90,9 +90,15 @@ This involves:
 
   - Interactive GUI to load an image, apply one or more transformations, preview and save results.
 
+
+
+
+
 - `app.py`
 
   - Interactive GUI to to test the model in a Interactive Interface on web.
+
+  ![alt text](assets/application_interface.jpeg)
 
 - `templates/index.html`
 
