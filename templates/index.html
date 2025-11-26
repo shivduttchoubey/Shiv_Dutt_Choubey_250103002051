@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing Technique Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .upload-box {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: #f8f9ff;
+        }
+
+        .upload-box:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .upload-box p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 250px;
+            margin-top: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #667eea;
+            font-weight: 600;
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .predict-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .predict-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .train-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .train-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
+        }
+
+        .results {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .result-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .confidence {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .images-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .probabilities {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .probabilities h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .probability-item {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .probability-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .probability-bar {
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success {
+            background: #2ecc71;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section, .images-display {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> Image Processing Technique Detector</h1>
+            <p>Upload original and processed images to detect the applied technique</p>
+        </div>
+
+        <div class="content">
+            <div class="error" id="error"></div>
+            <div class="success" id="success"></div>
+
+            <div class="upload-section">
+                <div class="upload-box" onclick="document.getElementById('original').click()">
+                    <div class="upload-icon">📁</div>
+                    <h3>Original Image</h3>
+                    <p>Click to upload</p>
+                    <input type="file" id="original" accept="image/*" onchange="previewImage(this, 'originalPreview', 'originalName')">
+                    <img id="originalPreview" class="preview-image">
+                    <div id="originalName" class="file-name"></div>
+                </div>
+
+                <div class="upload-box" onclick="document.getElementById('processed').click()">
+                    <div class="upload-icon">📁</div>
+                    <h3>Processed Image</h3>
+                    <p>Click to upload</p>
+                    <input type="file" id="processed" accept="image/*" onchange="previewImage(this, 'processedPreview', 'processedName')">
+                    <img id="processedPreview" class="preview-image">
+                    <div id="processedName" class="file-name"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="predict-btn" id="predictBtn" onclick="predictTechnique(event); return false;" disabled>
+                    Predict Technique
+                </button>
+                <button type="button" class="train-btn" onclick="trainModels(); return false;">
+                     Train Models
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing images...</p>
+            </div>
+
+            <div class="results" id="results">
+                <div class="result-header">
+                    <h2>Detected Technique</h2>
+                    <div id="predictedTechnique" style="font-size: 1.5em; margin: 10px 0;"></div>
+                    <div class="confidence" id="confidence"></div>
+                </div>
+
+                <div class="images-display">
+                    <div class="image-container">
+                        <h3>Original Image</h3>
+                        <img id="resultOriginal">
+                    </div>
+                    <div class="image-container">
+                        <h3>Processed Image</h3>
+                        <img id="resultProcessed">
+                    </div>
+                </div>
+
+                <div class="probabilities">
+                    <h3>All Predictions (Probability Distribution)</h3>
+                    <div id="probabilityList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewImage(input, previewId, nameId) {
+            const preview = document.getElementById(previewId);
+            const nameDiv = document.getElementById(nameId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    nameDiv.textContent = input.files[0].name;
+                    nameDiv.style.display = 'block';
+                    checkBothImages();
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function checkBothImages() {
+            const original = document.getElementById('original').files[0];
+            const processed = document.getElementById('processed').files[0];
+            const predictBtn = document.getElementById('predictBtn');
+            
+            if (original && processed) {
+                predictBtn.disabled = false;
+            }
+        }
+
+        // Prevent any default form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    e.preventDefault();
+                });
+            });
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function predictTechnique(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            const originalFile = document.getElementById('original').files[0];
+            const processedFile = document.getElementById('processed').files[0];
+            
+            if (!originalFile || !processedFile) {
+                showError('Please upload both images');
+                return false;
+            }
+
+            const formData = new FormData();
+            formData.append('original', originalFile);
+            formData.append('processed', processedFile);
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('predictBtn').disabled = true;
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                // Display results
+                document.getElementById('predictedTechnique').textContent = 
+                    data.prediction.replace(/_/g, ' ').toUpperCase();
+                document.getElementById('confidence').textContent = 
+                    `${(data.confidence * 100).toFixed(2)}% Confidence`;
+                
+                document.getElementById('resultOriginal').src = 
+                    'data:image/jpeg;base64,' + data.original_image;
+                document.getElementById('resultProcessed').src = 
+                    'data:image/jpeg;base64,' + data.processed_image;
+
+                // Display probability distribution
+                const probabilityList = document.getElementById('probabilityList');
+                probabilityList.innerHTML = '';
+                
+                data.all_predictions.forEach(pred => {
+                    const item = document.createElement('div');
+                    item.className = 'probability-item';
+                    
+                    const percentage = (pred.probability * 100).toFixed(2);
+                    
+                    item.innerHTML = `
+                        <div class="probability-label">
+                            <span>${pred.technique.replace(/_/g, ' ')}</span>
+                            <span>${percentage}%</span>
+                        </div>
+                        <div class="probability-bar">
+                            <div class="probability-fill" style="width: ${percentage}%">
+                            </div>
+                        </div>
+                    `;
+                    
+                    probabilityList.appendChild(item);
+                });
+
+                document.getElementById('results').style.display = 'block';
+                
+            } catch (error) {
+                showError('Prediction failed: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('predictBtn').disabled = false;
+            }
+            
+            return false;
+        }
+
+        async function trainModels() {
+            if (!confirm('Training will take several minutes. Continue?')) {
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.train-btn').disabled = true;
+
+            try {
+                const response = await fetch('/train', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Models trained successfully!');
+                } else {
+                    showError('Training failed: ' + data.message);
+                }
+                
+            } catch (error) {
+                showError('Training failed: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.train-btn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

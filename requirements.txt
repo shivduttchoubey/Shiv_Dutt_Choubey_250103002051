@@ -1,0 +1,10 @@
+numpy
+opencv-python
+scikit-learn
+matplotlib
+seaborn
+Pillow
+joblib
+tkinter
+Flask
+werkzeug
