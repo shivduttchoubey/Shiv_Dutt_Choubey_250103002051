@@ -126,7 +126,7 @@ This involves:
 3. **Prediction (`app.py`)**
 
    - Run the script to input the image and to identify the technique(s) applied on uploaded image.
-
+![alt text](assets/application_interface_test.jpeg)
 ***
 
 ## Installation
@@ -212,3 +212,10 @@ werkzeug
 2. **Use GUI** to apply and save transformations.
 3. **Predict** predict the technique applied using the app.py script.
 
+## Result of the Model 
+
+The result of the model predicts the probability of technique used to transform the original image.
+
+![alt text](assets/application_interface_test_result.jpeg)
+
+![alt text](assets/result_of_test.jpeg)
